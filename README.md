@@ -17,6 +17,15 @@ docker run --rm -p 8000:8000 calendario-uteis
 
 Acesse http://localhost:8000. A porta interna pode ser alterada com `-e PORT=...`.
 
+## Instalando no CasaOS
+
+A cada push na `main`, o GitHub Actions publica a imagem
+`ghcr.io/ggaspari/calendario-diasuteis:latest` para amd64 e arm64.
+
+1. No CasaOS, clique em **+** → **Install a customized app** → **Import**.
+2. Cole o conteúdo de [`casaos/docker-compose.yml`](casaos/docker-compose.yml) e confirme.
+3. Acesse `http://<ip-do-casaos>:8085`.
+
 ## Rodando sem Docker
 
 ```bash

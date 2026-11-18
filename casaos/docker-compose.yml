@@ -1,0 +1,56 @@
+name: calendario-diasuteis
+
+services:
+  calendario-diasuteis:
+    image: ghcr.io/ggaspari/calendario-diasuteis:latest
+    container_name: calendario-diasuteis
+    restart: unless-stopped
+    environment:
+      PORT: "8000"
+      TZ: America/Sao_Paulo
+    ports:
+      - target: 8000
+        published: "8085"
+        protocol: tcp
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    x-casaos:
+      envs:
+        - container: TZ
+          description:
+            en_us: Time zone
+            pt_br: Fuso horário
+      ports:
+        - container: "8000"
+          description:
+            en_us: Web UI port
+            pt_br: Porta da interface web
+
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  main: calendario-diasuteis
+  store_app_id: calendario-diasuteis
+  category: Utilities
+  author: ggaspari
+  developer: ggaspari
+  icon: https://raw.githubusercontent.com/ggaspari/calendario-diasuteis/main/casaos/icon.svg
+  title:
+    en_us: Calendário de Dias Úteis
+    pt_br: Calendário de Dias Úteis
+  tagline:
+    en_us: Business days per month with the 5th and 10th business days highlighted
+    pt_br: Dias úteis por mês com o 5º e o 10º dia útil destacados
+  description:
+    en_us: >-
+      Yearly calendar that counts business days in each month and highlights the
+      5th and 10th business days, taking Brazilian national holidays into account.
+    pt_br: >-
+      Calendário anual com a contagem de dias úteis de cada mês e o 5º e o 10º
+      dia útil destacados, considerando os feriados nacionais brasileiros.
+  port_map: "8085"
+  scheme: http
+  index: /
