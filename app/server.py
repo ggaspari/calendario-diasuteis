@@ -11,6 +11,7 @@ from urllib.parse import parse_qs, urlparse
 from feriados import calendario
 
 STATIC = Path(__file__).parent / "static"
+VERSAO = os.environ.get("APP_VERSION", "dev")
 
 
 def _flag(qs: dict, nome: str) -> bool:
@@ -26,8 +27,13 @@ class Handler(SimpleHTTPRequestHandler):
         if url.path == "/api/calendario":
             return self._api(parse_qs(url.query))
         if url.path == "/healthz":
-            return self._json(200, {"status": "ok"})
+            return self._json(200, {"status": "ok", "versao": VERSAO})
         return super().do_GET()
+
+    def end_headers(self):
+        # Evita que o navegador continue exibindo uma versão antiga da página.
+        self.send_header("Cache-Control", "no-cache")
+        super().end_headers()
 
     def _api(self, qs):
         try:
