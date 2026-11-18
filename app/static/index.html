@@ -46,7 +46,9 @@
   .d.q5::after { content: "5º"; } .d.q10::after { content: "10º"; }
   .feriados { margin-top: 24px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; }
   .feriados h2 { font-size: 1rem; margin: 0 0 8px; }
-  .feriados ul { margin: 0; padding-left: 18px; columns: 2 240px; font-size: .9rem; }
+  /* Três listas independentes: um nome longo só quebra linha na própria coluna. */
+  .feriados .colunas { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 24px; }
+  .feriados ul { margin: 0; padding-left: 18px; font-size: .9rem; }
   .erro { color: var(--feriado); }
   /* Versão para debug: branco no branco (selecione o texto para ver). */
   #versao { color: #fff; background: #fff; text-align: right; font-size: 8pt;
@@ -58,22 +60,25 @@
     html { font-size: 9pt; }
     body { background: #fff; }
     .controles { display: none; }
-    header { padding: 0 0 3mm; max-width: none; gap: 2mm 6mm; }
-    h1 { font-size: 14pt; flex: none; }
-    .legenda { font-size: 8pt; gap: 4mm; }
+    /* Medidas com folga (~25%) para navegadores que renderizam maior que o Chromium. */
+    header { padding: 0 0 1.5mm; max-width: none; gap: 1mm 6mm; }
+    h1 { font-size: 13pt; flex: none; }
+    .legenda { font-size: 7.5pt; gap: 4mm; }
     main { padding: 0; max-width: none; }
-    .resumo { margin: 0 0 3mm; font-size: 8pt; }
-    .grade { grid-template-columns: repeat(3, 1fr); gap: 3mm; }
-    .mes { padding: 2mm 3mm; border-radius: 2mm; break-inside: avoid; }
-    .mes h2 { font-size: 10pt; }
-    .mes .uteis { font-size: 8.5pt; }
-    .mes .marcos { font-size: 7pt; margin-bottom: 1mm; }
-    .dias { font-size: 8pt; gap: .6mm; }
-    .dias .cab { font-size: 6.5pt; padding-bottom: .5mm; }
-    .d { aspect-ratio: auto; height: 5.2mm; border-radius: 1.2mm; }
-    .feriados { margin-top: 3mm; padding: 2mm 4mm; border-radius: 2mm; break-inside: avoid; }
-    .feriados h2 { font-size: 9pt; margin-bottom: 1mm; }
-    .feriados ul { columns: 3; font-size: 7.5pt; }
+    .resumo { margin: 0 0 2mm; font-size: 7.5pt; }
+    .grade { grid-template-columns: repeat(3, 1fr); gap: 2.5mm; }
+    .mes { padding: 1.5mm 2.5mm; border-radius: 2mm; break-inside: avoid; }
+    .mes h2 { font-size: 9.5pt; }
+    .mes .uteis { font-size: 8pt; }
+    .mes .marcos { font-size: 6.5pt; margin-bottom: .5mm; }
+    .dias { font-size: 7.5pt; gap: .4mm; }
+    .dias .cab { font-size: 6pt; padding-bottom: 0; }
+    .d { aspect-ratio: auto; height: 4.4mm; border-radius: 1mm; }
+    .d.q5::after, .d.q10::after { font-size: .5em; margin-top: 0; }
+    .feriados { margin-top: 2.5mm; padding: 1.5mm 3mm; border-radius: 2mm; break-inside: avoid; }
+    .feriados h2 { font-size: 8.5pt; margin-bottom: .5mm; }
+    .feriados .colunas { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 4mm; }
+    .feriados ul { list-style: none; padding: 0; font-size: 7pt; }
     #versao { max-width: none; padding: 1mm 0 0; font-size: 6pt; }
   }
 </style>
@@ -97,7 +102,7 @@
 <main>
   <p class="resumo" id="resumo"></p>
   <div class="grade" id="grade"></div>
-  <section class="feriados"><h2>Feriados considerados</h2><ul id="lista"></ul></section>
+  <section class="feriados"><h2>Feriados considerados</h2><div class="colunas" id="lista"></div></section>
 </main>
 <footer id="versao" aria-hidden="true"></footer>
 <script>
@@ -135,10 +140,14 @@ function render(dados) {
       <div class="dias">${SEMANA.map(s => `<div class="cab">${s}</div>`).join("")}${vazios}${dias}</div>
     </article>`;
   }).join("");
-  $("lista").innerHTML = dados.feriados.map(f => {
+  // Lista em 3 colunas preenchidas de cima para baixo, cada uma com altura própria.
+  const itens = dados.feriados.map(f => {
     const [a, mo, d] = f.data.split("-");
     return `<li>${d}/${mo} — ${f.nome}</li>`;
-  }).join("");
+  });
+  const porColuna = Math.ceil(itens.length / 3);
+  $("lista").innerHTML = [0, 1, 2]
+    .map(i => `<ul>${itens.slice(i * porColuna, (i + 1) * porColuna).join("")}</ul>`).join("");
 }
 
 const params = new URLSearchParams(location.search);
