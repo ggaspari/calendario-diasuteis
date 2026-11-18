@@ -48,6 +48,9 @@
   .feriados h2 { font-size: 1rem; margin: 0 0 8px; }
   .feriados ul { margin: 0; padding-left: 18px; columns: 2 240px; font-size: .9rem; }
   .erro { color: var(--feriado); }
+  /* Versão para debug: branco no branco (selecione o texto para ver). */
+  #versao { color: #fff; background: #fff; text-align: right; font-size: 8pt;
+            max-width: 1200px; margin: 0 auto; padding: 0 16px 8px; }
   /* Impressão: ano inteiro em uma folha A4 retrato (3 colunas x 4 fileiras). */
   @page { size: A4 portrait; margin: 10mm; }
   @media print {
@@ -71,6 +74,7 @@
     .feriados { margin-top: 3mm; padding: 2mm 4mm; border-radius: 2mm; break-inside: avoid; }
     .feriados h2 { font-size: 9pt; margin-bottom: 1mm; }
     .feriados ul { columns: 3; font-size: 7.5pt; }
+    #versao { max-width: none; padding: 1mm 0 0; font-size: 6pt; }
   }
 </style>
 </head>
@@ -95,6 +99,7 @@
   <div class="grade" id="grade"></div>
   <section class="feriados"><h2>Feriados considerados</h2><ul id="lista"></ul></section>
 </main>
+<footer id="versao" aria-hidden="true"></footer>
 <script>
 const $ = id => document.getElementById(id);
 const SEMANA = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
@@ -144,6 +149,7 @@ $("ant").onclick = () => { $("ano").value--; carregar(); };
 $("prox").onclick = () => { $("ano").value++; carregar(); };
 ["ano", "carnaval", "corpus"].forEach(id => $(id).addEventListener("change", carregar));
 carregar();
+fetch("/healthz").then(r => r.json()).then(s => { $("versao").textContent = s.versao; }).catch(() => {});
 </script>
 </body>
 </html>

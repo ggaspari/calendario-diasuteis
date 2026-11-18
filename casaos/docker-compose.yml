@@ -4,6 +4,7 @@ services:
   calendario-diasuteis:
     image: ghcr.io/ggaspari/calendario-diasuteis:latest
     container_name: calendario-diasuteis
+    pull_policy: always
     restart: unless-stopped
     environment:
       PORT: "8000"
