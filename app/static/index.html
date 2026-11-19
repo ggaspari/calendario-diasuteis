@@ -53,6 +53,22 @@
   /* Versão para debug: branco no branco (selecione o texto para ver). */
   #versao { color: #fff; background: #fff; text-align: right; font-size: 8pt;
             max-width: 1200px; margin: 0 auto; padding: 0 16px 8px; }
+  /* Modo P&B: sem cores nem cinzas de fundo, para impressora laser monocromática.
+     As marcações se distinguem por preenchimento, contorno e traço, não por tom. */
+  body.pb { --text: #000; --muted: #555; --line: #000; --quinto: #000; --decimo: #000;
+            --feriado: #000; --feriado-bg: #fff; background: #fff; }
+  body.pb .mes, body.pb .feriados { background: #fff; border-color: #000; }
+  body.pb .d.fds { background: none; color: #555; }
+  body.pb .d.fer { background: #fff; color: #000; outline: 1px dashed #000; outline-offset: -1px;
+                   text-decoration: underline; text-underline-offset: 2px; }
+  body.pb .d.q5 { background: #000; color: #fff; }
+  body.pb .d.q10 { background: #fff; color: #000; box-shadow: inset 0 0 0 2px #000; }
+  body.pb .legenda { color: #000; }
+  body.pb .l-5::before { background: #000; }
+  body.pb .l-10::before { background: #fff; box-shadow: inset 0 0 0 2px #000; }
+  body.pb .l-fer::before { background: #fff; border: 1px dashed #000; }
+  body.pb .l-fds::before { background: #fff; border: 1px solid #555; }
+  body.pb #versao { color: #fff; }
   /* Impressão: ano inteiro em uma folha A4 retrato (3 colunas x 4 fileiras). */
   @page { size: A4 portrait; margin: 10mm; }
   @media print {
@@ -92,6 +108,7 @@
     <button id="prox" aria-label="Próximo ano">▶</button>
     <label><input type="checkbox" id="carnaval"> Carnaval</label>
     <label><input type="checkbox" id="corpus"> Corpus Christi</label>
+    <label title="Sem cores, para impressora laser monocromática"><input type="checkbox" id="pb"> Preto e branco</label>
     <button onclick="window.print()">Imprimir</button>
   </div>
   <div class="legenda">
@@ -113,7 +130,7 @@ async function carregar() {
   const ano = $("ano").value;
   const qs = new URLSearchParams({ ano, carnaval: $("carnaval").checked ? 1 : 0,
                                    corpus_christi: $("corpus").checked ? 1 : 0 });
-  history.replaceState(null, "", "?" + qs);
+  history.replaceState(null, "", "?" + qs + ($("pb").checked ? "&pb=1" : ""));
   const r = await fetch("/api/calendario?" + qs);
   const dados = await r.json();
   if (!r.ok) { $("grade").innerHTML = `<p class="erro">${dados.erro}</p>`; return; }
@@ -157,6 +174,16 @@ $("corpus").checked = params.get("corpus_christi") === "1";
 $("ant").onclick = () => { $("ano").value--; carregar(); };
 $("prox").onclick = () => { $("ano").value++; carregar(); };
 ["ano", "carnaval", "corpus"].forEach(id => $(id).addEventListener("change", carregar));
+// P&B só troca o estilo: não precisa buscar o calendário de novo.
+function aplicarPB() {
+  document.body.classList.toggle("pb", $("pb").checked);
+  const qs = new URLSearchParams(location.search);
+  if ($("pb").checked) qs.set("pb", "1"); else qs.delete("pb");
+  history.replaceState(null, "", "?" + qs);
+}
+$("pb").checked = params.get("pb") === "1";
+$("pb").addEventListener("change", aplicarPB);
+aplicarPB();
 carregar();
 fetch("/healthz").then(r => r.json()).then(s => { $("versao").textContent = s.versao; }).catch(() => {});
 </script>
